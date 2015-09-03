@@ -1,6 +1,12 @@
 %% load image
 
 imgLocation = '/home/steffen/Dokumente/KITTI/experiments/classified_images/easy_cl16_mir150_rem150/training/01_-2.75/Car_-2.56_-00003064_0_0.03.png';
+% new location (not flipped):
+newLocation = '/home/steffen/Dokumente/KITTI/experiments/classified_images/cv_easy_rgb_cl16/fold_04/07_-0.39/Car_-0.58_000002852_0_0.03.png';
+img = imread(newLocation);
+img = rgb2gray(img);
+img = fliplr(img);
+
 img = imread(imgLocation);
 % crop image to fit grid later
 img = img(1:157,1:421);
@@ -50,8 +56,14 @@ for i=1:3
     imgRGB(1:cellSize(1):end,:,i) = colorValue(i);
     imgRGB(:,1:cellSize(2):end,i) = colorValue(i);
 end
+a = imgRGB(:,2:3,1);
 imshow(imgRGB);
 imwrite(imgRGB, 'car_with_red_grid.png');
+
+%% extract one cell
+singleCell = imgRGB(41:78,72:140,:);
+figure;
+imshow(singleCell)
 
 %% stripes
 lineStrength = 10;

@@ -2,29 +2,24 @@
 
 % Execute hog_pipeline.m up until Step 8 (feature extraction)
 
-%% set parameters
-imgParams.imgSize       = [64 120]; % multiples of patchSize
-imgParams.patchSize     = [8 8];
-imgParams.amountCells   = [4 6];
-
-%% dictionary params
-spamsParams.K=256;  % learns a dictionary with 256 elements
-spamsParams.mode=3;
-spamsParams.lambda=1;
-spamsParams.numThreads=-1; % number of threads
-spamsParams.batchsize=400;
-spamsParams.verbose=false;
-spamsParams.iter=250;
-
 %% learn dictionary
 
+% load image set
+dlTrainSet = imageSet('/home/steffen/Dokumente/KITTI/experiments/allImages_1fold_16classes', 'recursive');
+
 % choose subset of images for DL
-trainSubSet = removeImgsFromSet(trainingSet, 10);
+dlTrainSubSet = removeImgsFromSet(dlTrainSet, 10);
 
 % learning
-[D, model] = learnDictionary(trainSubSet, imgParams, spamsParams);
+dictLength = [25, 36, 49];
+for d=1:length(dictLength)
+    spamsParams.K = dictLength(d)
+    [D, model] = learnDictionary(dlTrainSubSet, imgParams, spamsParams);
+    save(sprintf('dictionaries/length_%d.mat', dictLength(d)), 'D', 'model');
+end
 
 ImD=displayPatches(D);
+figure;
 imagesc(ImD); colormap('gray');
 drawnow;
 
@@ -36,114 +31,45 @@ drawnow;
 
 hscParams.binning = 'hard'; % alternatives: 'soft', 'hard'
 
-for i=1:processParams.folds
-    fprintf('fold#%d\n', i);
-    currFoldName = sprintf('fold_%02d', i);
-    imgSetOfCurrFold = imageSet(fullfile(classifPath, classifFolder, currFoldName), 'recursive');
-    [currFold.features, currFold.exactLabels, currFold.classLabels, currFold.locations] = ...
-        computeHSCFeatures(imgSetOfCurrFold, D, processParams, imgParams, spamsParams, hscParams)
-    % allFoldsData{1,i} = currFold;
-    save(sprintf('fold_%02d.mat', i), 'currFold')
-end
+for j=1:length(dictLength)
+    
+    fprintf('dictionary length: %d\n', dictLength(j))
+    
+    spamsParams.K = dictLength(j);
+    load(sprintf('dictionaries/length_%d.mat', dictLength(j)))
+    
+    for i=1:processParams.folds
+        fprintf('fold#%d\n', i);
+        currFoldName = sprintf('fold_%02d', i);
+        imgSetOfCurrFold = imageSet(fullfile(dirs.classified, processParams.classifFolder, currFoldName), 'recursive');
+        [currFold.features, currFold.exactLabels, currFold.classLabels, currFold.locations] = ...
+            computeHSCFeatures(imgSetOfCurrFold, D, processParams, imgParams, spamsParams, ...
+            hscParams);
+        % allFoldsData{1,i} = currFold;
+        save(sprintf('features/dictLength_%d_%s.mat', spamsParams.K, currFoldName), 'currFold')
+    end
+    
+    % splitted to prevent break down
 
-for i=1:processParams.folds
-    load(sprintf('fold_%02d.mat', i))
-    allFoldsData{1,i} = currFold;
+    % to reload data into one file
+    for i=1:processParams.folds
+        load(sprintf('features/dictLength_%d_fold_%02d.mat', spamsParams.K, i))
+        allFoldsData{1,i} = currFold;
+    end
+    save(sprintf('features/hsc_features_dictLength_%d.mat', spamsParams.K), 'allFoldsData')
 end
-save('hsc_features_6144dim.mat', 'allFoldsData')
 
 % dimensionality reduction with pca?
 % example: http://www.mathworks.com/help/stats/feature-transformation.html#f75476
 
-distinctClassLbls = cell(1,size(trainingSet, 2));
-for i=1:size(trainingSet,2)
-    distinctClassLbls{1,i} = trainingSet(1,i).Description;
-end
 
-[trainFeat, trainExactLabels, trainClassLabels, trainLocations] = ...
-    computeSparseFeaturesDirectVer2(trainingSet, distinctClassLbls, imgParams, D, spamsParams);
-[testFeat,  testExactLabels,  testClassLabels,  testLocations]  = ...
-    computeSparseFeaturesDirectVer2(testSet,     distinctClassLbls, imgParams, D, spamsParams);
-% for classifier learning full matrix is necessary
-trainFeat = full(trainFeat);
-testFeat = full(testFeat);
-
-%% learn classifier
-learner = templateSVM('KernelFunction','linear');
-fprintf('Learn classifier ...');
-tic
-classifier = fitcecoc(trainFeat, trainClassLabels, 'Learners', learner);
-t = toc;
-fprintf('Computing time: %f\n', t);
-
-%% predict
-predictedLabels = predict(classifier, testFeat);
-
-%% evaluate
-
-predLabelsDouble = char2double(predictedLabels);
-
-diff = arrayfun(@getAngleBetweenRadians, predLabelsDouble, testExactLabels);
-results = {predLabelsDouble, testExactLabels, diff, testLocations};
-
-%% Print metrics and show plots
-
-config = sprintf('16clDict_easy_cl16_mir150_rem150_02');
-plotTitle = 'histogram of sparse codes';
-amountClasses = 16;
-
-% print metrics
-metrParams.description = plotTitle;
-printResultMetrics(results, metrParams);
-
-% Error plot
-helpVec = cell2mat(results(:,3));
-
-errParams.amountClasses = amountClasses;
-errParams.description   = plotTitle;
-errParams.cosSimilarity = 1/size(helpVec, 1) * sum(arrayfun(@(x) (1+cos(x))/2, helpVec));
-% parameter for saving the plot
-errParams.print         = true;
-errParams.plotName      = sprintf('error_%s', config);
-errParams.saveLocation  = fullfile(plotDirectory, 'error_plots');
-
-errParams.mode          = 'classes';
-createErrorPlot(results, errParams);
-
-errParams.mode          = 'difficulties';
-createErrorPlot(results, errParams);
-
-% Image examples plot
-exParams.amountImages   = 36;
-exParams.description    = plotTitle;
-exParams.startingPoint  = 0;
-% parameter for saving the plot
-exParams.print          = true;
-exParams.saveLocation   = fullfile(plotDirectory, 'image_examples');
-
-exParams.mode           = 'worst';
-exParams.plotName       = sprintf('imgEx_%s_%sOffset%d', config, exParams.mode, ...
-    exParams.startingPoint);
-worstLocs = createImgExamplePlot(results, exParams);
-
-exParams.mode           = 'best';
-exParams.plotName       = sprintf('imgEx_%s_%sOffset%d', config, exParams.mode, ...
-    exParams.startingPoint);
-createImgExamplePlot(results, exParams);
-
-
-% Tabulate the results using a confusion matrix.
-confMat = confusionmat(testClassLabels, predictedLabels);
-myHelperDisplayConfusionMatrix(confMat, size(trainingSet, 2), 'absolute')
+%% OLD STUFF
 
 %% reconstruct (for visualisation)
 for i=29:50
 imgLocation = trainingSet(1,1).ImageLocation{1,1};
 reconstructImage(imgLocation, imgParams, D, spamsParams);
 end
-
-
-
 
 % convert to full matrix to obtain indices of maximum values
 alphaFull = full(alpha);

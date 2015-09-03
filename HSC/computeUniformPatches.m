@@ -1,6 +1,5 @@
-function imgPatches = computeUniformPatches(imgLocation, imgParams)
+function imgPatches = computeUniformPatches(img, imgParams)
 
-img = imread(imgLocation);
 % resize to average size
 imgResized = imresize(img, imgParams.imgSize);
 % preprocess

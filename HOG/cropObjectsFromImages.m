@@ -1,98 +1,123 @@
-function cropObjectsFromImages(imgDir, txtDir, outParentDir, outFolderName, parameters)
-
-% set parameters
-objects     = parameters{1, 1};
-occlThresh  = parameters{1, 2};
-truncThresh = parameters{1, 3};
-minImgSize  = parameters{1, 4};
-mode        = parameters{1, 5};
+function cropObjectsFromImages(imgDir, txtDir, outDir, params)
 
 % create directory
-mkdir(outParentDir, outFolderName);
-% set output directory
-outDir = fullfile(outParentDir, outFolderName);
+mkdir(outDir);
 
-% load image sets
-trainingSet = imageSet(fullfile(imgDir, 'training'));
-testSet     = imageSet(fullfile(imgDir, 'test'    ));
+% get the names of the folds
+folderNames = getSubfolders(imgDir);
 
-k = 0;
+vehNumber = 0;
 
-setForCropping = {trainingSet, testSet};
-setFolderNames = {'training', 'test'};
 % perform cropping for training and test set
-for m = 1:length(setForCropping)
-    fprintf('Cropping object images from %s images ... ', setFolderNames{m});
-    % for every image in image set
-    mkdir(outDir, setFolderNames{m});
-    currentSet = setForCropping{m};
+for m = 1:size(folderNames,1)
+    currFolderName = folderNames{m,1};
+    fprintf('Cropping object images from %s ... ', currFolderName);
+    
     % create output file
-    outputTxt = fopen(fullfile(outDir, strcat(setFolderNames{m}, '.txt')), 'w');
-    reverseStr ='';
-    for i = 1:currentSet.Count
+    outputTxt = fopen(fullfile(outDir, strcat(currFolderName, '.txt')), 'w');
+    
+    % for every image in image set
+    mkdir(outDir, currFolderName);
+    currentPath = fullfile(imgDir, currFolderName);
+    currentSet = imageSet(currentPath);
+    
+    [~, imgNames, ~] = cellfun(@fileparts, currentSet.ImageLocation, ...
+        'UniformOutput', false);
+    
+    helpCell{1,1} = '-';
+    imgProperties = cellfun(@strsplit, imgNames, repmat(helpCell, size(imgNames)), ...
+        'UniformOutput', false);
+    
+    amountImages    = length(imgProperties);
+    datesOfDr       = cell(amountImages, 1);
+    drives          = zeros(amountImages, 1);
+    frames          = zeros(amountImages, 1);
+    imgNumbers      = zeros(amountImages, 1);
+    
+    for n=1:amountImages
+        datesOfDr{n} = imgProperties{n}{1};
+        drives(n) = str2double(imgProperties{n}{2});
+        frames(n) = str2double(imgProperties{n}{3});
+        imgNumbers(n) = str2double(imgProperties{n}{4});
+    end
+    
+    uniqueDates = unique(datesOfDr);
+    
+    for d=1:length(uniqueDates)
+        % select all images from one date
+        currDate.dateOfDr   = uniqueDates(d);
+        currDate.drives     = drives(strcmp(datesOfDr, uniqueDates(d)));
+        currDate.frames     = frames(strcmp(datesOfDr, uniqueDates(d)));
+        currDate.imgNumbers = imgNumbers(strcmp(datesOfDr, uniqueDates(d)));
         
-        imgPath = currentSet.ImageLocation{i};
-        imgLocSplitted = strsplit(imgPath, '/');
-        imgName = imgLocSplitted{end};
+        uniqueDrives = unique(currDate.drives);
         
-        completeImg = imread(imgPath);
-        
-        % read txt file
-        txtName = strrep(imgName, 'png', 'txt');
-        
-        annotFile = fopen(fullfile(txtDir, txtName));
-        Annot = textscan(annotFile, '%s %f %d %f %f %f %f %f %f %f %f %f %f %f %f');
-        fclose(annotFile);
-        
-        % for every annotation in *.txt file
-        for j = 1 : length(Annot{1})
+        for r=1:length(uniqueDrives)
+            % select all images from one drive
+            currDrive.dateOfDr      = currDate.dateOfDr;
+            currDrive.driveNumber   = uniqueDrives(r);
+            currDrive.frames        = currDate.frames(currDate.drives == uniqueDrives(r));
+            currDrive.imgNumbers    = currDate.imgNumbers(currDate.drives == uniqueDrives(r));
+            currDrive.amountImages  = length(currDrive.frames);
             
-            vehicleType = Annot{1, 1}{j};
-            occlusion = Annot{1, 3}(j);
-            truncation = Annot{1, 2}(j);
-            angle = Annot{1, 4}(j);
+            % lastRearImage depicts the frame number where the last rear image has been
+            % cropped from. Initialize variable so that frame with number 0 is cropped at
+            % beginning.
+            lastRearImage = - params.removalFrequency;
             
-            % select specified objects and fully visible vehicles
-            if (sum(strcmp(vehicleType, objects)) == 1) && ...
-                    (occlusion <= occlThresh) &&  (truncation <= truncThresh)
+            for i=1:currDrive.amountImages
                 
-                % bounding box defined with left, top, right, bottom coordinates
-                bbox = [Annot{1, 5}(j) Annot{1, 6}(j) Annot{1, 7}(j) Annot{1, 8}(j)];
-                % calculate width and height for cropping
-                width = bbox(3) - bbox(1);
-                height = bbox(4) - bbox(2);
+                imgName = sprintf('%s-%04d-%010d-%06d.png', uniqueDates{d}, uniqueDrives(r),...
+                    currDrive.frames(i), currDrive.imgNumbers(i));
+                imgPath = fullfile(currentPath, imgName);
                 
-                % crop image only if it's 'large enough'
-                if (width >= minImgSize(2)) && (height >= minImgSize(1))
-                    % crop image
-                    croppedImg = imcrop(completeImg, [bbox(1) bbox(2) width height]);
+                % read corresponding txt file with annotations
+                txtName = sprintf('%06d.txt', currDrive.imgNumbers(i));
+                
+                annotFile = fopen(fullfile(txtDir, txtName));
+                Annot = textscan(annotFile, '%s %f %d %f %f %f %f %f %f %f %f %f %f %f %f');
+                fclose(annotFile);
+                
+                % for every annotation in *.txt file
+                for j = 1 : length(Annot{1})
                     
-                    % convert to gray scale if desired
-                    switch mode
-                        case 'gray'
-                            croppedImg = rgb2gray(croppedImg);
+                    obj = extractAnnotation(Annot, j);
+                    
+                    [extract, newLastRearImage] = extractionCriteriaFullfilled(obj, params, ...
+                        lastRearImage, currDrive.frames(i));
+                    % Set the new frame number when an image from the rear was cropped.
+                    % Stays the same if no image from the rear was cropped.
+                    lastRearImage = newLastRearImage;
+                    
+                    if extract
+                        
+                        completeImg = imread(imgPath);
+                        % crop image
+                        croppingRectangle = [obj.bbox(1) obj.bbox(2) obj.width obj.height];
+                        croppedImg = imcrop(completeImg, croppingRectangle);
+                        
+                        % convert to gray scale if desired
+                        switch params.mode
+                            case 'gray'
+                                croppedImg = rgb2gray(croppedImg);
+                        end
+                        
+                        % save image as [type]_[angle]_[imageNumber]_[occlusion]_[truncation].png
+                        croppedName = sprintf('%s_%0.2f_%09d_%d_%0.2f.png', ...
+                            obj.vehicleType, obj.angle, vehNumber, obj.occlusion, obj.truncation);
+                        imwrite(croppedImg, fullfile(outDir, currFolderName, croppedName));
+                        
+                        % write information to txt file
+                        fprintf(outputTxt, '%s %0.2f %09d %d %0.2f\n', ...
+                            obj.vehicleType, obj.angle, vehNumber, obj.occlusion, obj.truncation);
+                        
+                        vehNumber = vehNumber + 1;
                     end
-                    
-                    % save image as [type]_[angle]_[imageNumber]_[occlusion]_[truncation].png
-                    croppedName = sprintf('%s_%0.2f_%09d_%d_%0.2f.png', ...
-                        vehicleType, angle, k, occlusion, truncation);
-                    imwrite(croppedImg, fullfile(outDir, setFolderNames{m}, croppedName));
-                    
-                    % write information to txt file
-                    fprintf(outputTxt, '%s %0.2f %09d %d %0.2f\n', ...
-                        vehicleType, angle, k, occlusion, truncation);
-                    
-                    k = k + 1;
                 end
             end
         end
-        % display progress
-        msg = sprintf('%d/%d', i, currentSet.Count);
-        fprintf([reverseStr, msg]);
-        reverseStr = repmat(sprintf('\b'), 1, length(msg));
     end
     fclose(outputTxt);
     fprintf(' ... DONE!\n');
 end
-
 end

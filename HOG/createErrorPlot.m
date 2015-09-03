@@ -1,4 +1,4 @@
-function f = createErrorPlot(dataCell, params)
+function binSums = createErrorPlot(dataCell, params)
 
 % A:
 % 1st row: regression estimate
@@ -6,9 +6,6 @@ function f = createErrorPlot(dataCell, params)
 % 3rd row: radian difference
 A = cell2mat(dataCell(:,1:3));
 
-% more detailed stacked histogram
-diagramBins = 20;
-xtickFlag = 2;
 maxYAxis = size(A, 1);
 
 switch params.mode
@@ -74,15 +71,21 @@ switch params.mode
         legendString = 'legend(''easy'', ''moderate'', ''hard'')';
 end
 
-% create a histogram for every class
-histogramValues = [];
-figure;
+% sum up all the values per class/difficulty
+binSums = zeros(params.diagramBins,distinctions);
 for j = 1:distinctions
-    % do not show the histograms
-    set(gcf, 'Visible', 'off')
+    
+    % get deviations for the current distinction
     radDiffForClass = belonging{1, j}(:,3);
-    h = histogram(radDiffForClass, diagramBins, 'BinLimits', [0 3.2]);
-    histogramValues  = [histogramValues h.Values'];
+    
+    binAssignments = arrayfun(@getBinAssignment, radDiffForClass, ...
+        repmat(params.diagramBins, size(radDiffForClass,1), 1));
+    
+    amountInBin = zeros(params.diagramBins,1);
+    for b=1:params.diagramBins
+        amountInBin(b,1) = sum(binAssignments == b);
+    end
+    binSums(:,j) = amountInBin;
 end
 
 % calculate evaluation metrics:
@@ -90,20 +93,20 @@ diffVec = A(:,3);
 evalMetric = 1/size(diffVec, 1) * sum(arrayfun(@(x) (1+cos(x))/2, diffVec));
 tanhMetric = 1/size(diffVec, 1) * sum(arrayfun(@(x) (1-tanh(x)), diffVec));
 
-f = figure;
-bar(histogramValues, 'stacked');
+figure;
+bar(binSums, 'stacked');
 eval(legendString)
-set(gca, 'xticklabel', getBarLabels(diagramBins, xtickFlag))
+set(gca, 'xticklabel', getBarLabels(params.diagramBins, params.xtickFlag))
 ax = gca;
 ax.Title.String = {...
                     params.description; ...
-                    sprintf('(evaluation metric: %0.6f)', evalMetric); ...
-                    sprintf('(tanh metric: %0.6f)', tanhMetric)};
+                    sprintf('(cosine metric: %0.3f)', evalMetric); ...
+                    sprintf('(tanh metric: %0.3f)', tanhMetric)};
 
 ax.XLabel.String = 'Deviation';
 % don't show all ticks
-ax.XTick = [1:xtickFlag:diagramBins];
-axis([0 diagramBins + 1 0 maxYAxis])
+ax.XTick = 1:params.xtickFlag:params.diagramBins;
+axis([0 params.diagramBins + 1 0 maxYAxis])
 
 if params.print == true
     saveas(f, fullfile(params.saveLocation, sprintf('%s_%s.png', params.plotName, ...
@@ -115,12 +118,12 @@ end
 function barLabels = getBarLabels(amountBins, flag)
 
 allBarLabels = cell(1, amountBins);
-values = linspace(0, 3.14, amountBins);
+values = linspace(0, 3.14, amountBins + 1);
 for i = 1:amountBins
-    allBarLabels{1, i} = sprintf('%0.2f', values(i));
+    allBarLabels{1, i} = sprintf('%0.2f', values(i+1));
 end
 
-idxOfNecessLabels = [1:flag:amountBins];
+idxOfNecessLabels = 1:flag:amountBins;
 barLabels = cell(1, length(idxOfNecessLabels));
 for j = 1:length(idxOfNecessLabels)
     barLabels{1, j} = allBarLabels{1, idxOfNecessLabels(j)};

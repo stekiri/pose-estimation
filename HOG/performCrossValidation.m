@@ -11,7 +11,7 @@ for l=1:length(gridParams.C)
     end
 end
 
-% time stamp for backup files
+% time stamp to create backup directory
 dateTime = fix(clock);
 timeStamp = sprintf('%04d_%02d_%02d-%02d_%02d_%02d', dateTime);
 backupDir = fullfile(processParams.backupLoc, timeStamp);
@@ -45,10 +45,31 @@ for p=1:length(paramList)
         % merge all folds except k-th fold
         [trainD, testD] = mergeData(allFoldsData, k);
         
-        [cv.results, cv.plotTitle, cv.confMat, cv.modelC, cv.modelR, cv.probEstim] = ...
-            combinedClassifRegrApproach(...
-            trainD, testD, processParams.classes, predParams);
+        % reduce dimensionality if desired
+        if predParams.reduceDimensionality == true
+            [trainD.features, testD.features] = reduceDimensionality(...
+                trainD.features, testD.features, predParams.reducedFeatLength, ...
+                predParams.reductionMode);
+        end
         
+        % learn the models
+        [cv.modelC, cv.modelR] = ...
+            trainCombClassifRegrModel(trainD, processParams.classes, predParams);
+        % predict test data with learned models
+        [prediction, cv.probEstim, cv.plotTitle] = ...
+            testCombClassifRegrModel(...
+            cv.modelC, cv.modelR, testD, processParams.classes, predParams);
+        % calculate differences between truth and prediction & confusion matrix
+        [cv.results, cv.confMat] = calcPredictionResults(...
+            prediction, testD, processParams.classes);
+        
+        % model can be large and is not always needed to be saved
+        if predParams.saveModel == false
+            cv.modelC = [];
+            cv.modelR = [];
+        end
+        
+        % include fold number into plot title
         cv.plotTitle = sprintf('%s -- cv%d', cv.plotTitle, k);
         
         % calculate metric
@@ -70,7 +91,7 @@ for p=1:length(paramList)
     t = toc;
     fprintf('average evaluation metric: %0.6f\n', mean(cvMetrics));
     fprintf('average tanh metric: %0.6f\n', mean(cvTanhMetrics));
-    fprintf('calculation time: %0.1f min\n', t/60);
+    fprintf('computation time: %0.1f min\n', t/60);
     
     gridResults{1,p} = struct(...
                         'avgMetric', {mean(cvMetrics)},...

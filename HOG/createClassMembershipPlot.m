@@ -1,4 +1,4 @@
-function createClassMembershipPlot(allResults, processParams, params)
+function [allTruClass, allPredClass] = createClassMembershipPlot(allResults, processParams, params)
 
 allPredClass = 0;
 allTruClass  = 0;

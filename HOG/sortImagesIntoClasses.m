@@ -1,31 +1,23 @@
-function sortImagesIntoClasses(inputFolder, outputFolder, inputFolderName, ...
-    outputFolderName, amountClasses)
+function sortImagesIntoClasses(imgDir, outputDir, amountClasses)
 
-% set image directory
-imgDir  = fullfile(inputFolder, inputFolderName);
-% set output directory
-mkdir(outputFolder, outputFolderName);
-newSubFolder = fullfile(outputFolder, outputFolderName);
+% create output directory
+mkdir(outputDir);
 
-nameOfImageSets = {'training', 'test'};
+folderNames = getSubfolders(imgDir);
 
 [centers, classBounds] = calcCenterAndBoundsForClass(amountClasses);
 
-for m = 1:length(nameOfImageSets)
-    fprintf('Sorting %s images into classes ... ', nameOfImageSets{m});
-    currentImgSet = nameOfImageSets{m};
+for m = 1:length(folderNames)
+    fprintf('Sorting %s images into classes ... ', folderNames{m});
+    currentImgSet = folderNames{m};
     % import image information from text file
     imgTxtData = fopen(fullfile(imgDir, strcat(currentImgSet, '.txt')));
     % structure of txt-file: [vehicleType] [angle] [imgNumber] [occlusion] [truncation]
     imgCell = textscan(imgTxtData, '%s %f %f %f %f');
     fclose(imgTxtData);
     
-    % convert vehicle strings into numbers
-    imgsTotal = size(imgCell{1,1},1);
-    helpVec = zeros(imgsTotal,1);
-    for n = 1:imgsTotal
-        helpVec(n,1) = getVehicleNumber(imgCell{1,1}{n,1});
-    end
+    % convert vehicle strings into numbers    
+    helpVec = cellfun(@getVehicleNumber, imgCell{1,1});
     
     A = [helpVec cell2mat(imgCell(:,2:end))];
     
@@ -48,7 +40,7 @@ for m = 1:length(nameOfImageSets)
     for j = 1:amountClasses
         
         classFolderName = sprintf('%02d_%+0.2f', j, centers(j));
-        splitFolder = fullfile(newSubFolder, currentImgSet);
+        splitFolder = fullfile(outputDir, currentImgSet);
         mkdir(splitFolder, classFolderName);
         classFolder = fullfile(splitFolder, classFolderName);
         
