@@ -1,7 +1,11 @@
 function imgLocations = createImgExamplePlot(dataCell, params)
+%createImgExamplePlot Plot the prediction errors.
+% imgLocations = createImgExamplePlot(dataCell, params) shows the worst or
+% best predicted images. params has to be set accordingly. imgLocations
+% contains the path where the image is stored.
 
 % A:
-% 1st row: estimate
+% 1st row: prediction
 % 2nd row: ground truth
 % 3rd row: radian difference
 A = cell2mat(dataCell(:,1:3));

@@ -1,7 +1,12 @@
 function model = svmtrainSeperately(labels, features, params, amountClasses)
+%svmtrainSeperately Predict with seperately trained SVM classifiers.
+% model = svmtrainSeperately(labels, features, params, amountClasses)
+% trains all possible combinations of SVM classifiers, e.g., 1vs2 AND 2vs1.
+% It returns a cell which includes all models
 
+% initialize
 model = cell(amountClasses);
-
+% compute cost matrix for penalization
 costMatrix = buildEquallyDistributedCostMatrix(16, 'exponential');
 
 for i=1:amountClasses

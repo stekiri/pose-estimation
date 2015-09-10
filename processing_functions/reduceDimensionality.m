@@ -1,5 +1,7 @@
 function [redTrainFeat, redTestFeat] = reduceDimensionality(...
     trainFeat, testFeat, newFeatLength, mode)
+%reduceDimensionality Reduce the dimensionality.
+% Reduce the dimensionality of train and test features in a uniform manner.
 
 switch mode
     case 'pca'

@@ -1,3 +1,5 @@
+% Script to display the patches from a computed dictionary.
+
 blackline = repmat([-1], 8, 1);
 multPatches = [blackline];
 

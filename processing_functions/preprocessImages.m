@@ -1,9 +1,11 @@
 function preprocessImages(inputFolder, outputFolder, params)
+%preprocessImages Adjust image contrast.
+% Increase image contrast in a certain range. Range depends on the mean
+% brightness of an image.
 
 fprintf('Preprocessing images ... ');
 
 mkdir(outputFolder);
-
 imgSet = imageSet(inputFolder, 'recursive');
 
 reverseStr = '';

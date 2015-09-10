@@ -1,4 +1,7 @@
 function writeImageSet(imgSet, location, withSubStructure)
+%writeImageSet Write an image set on the HDD.
+% After removal of images from an image set it is necessary to save the
+% image set in order to persist the new reduced image set.
 
 % create directory
 mkdir(location);

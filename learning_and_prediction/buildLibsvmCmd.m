@@ -1,4 +1,9 @@
 function cmd = buildLibsvmCmd(params, addPar)
+%buildLibsvmCmd Builds the command for the libsvm library.
+% cmd = buildLibsvmCmd(params, addPar) builds the command which is used to
+% execute the libsvm library. params contains all the settings, addPar only
+% has to be specified for a specific experiment with specialized
+% classifiers and can be ommited in general.
 
 % general settings:
 % -q    quiet mode

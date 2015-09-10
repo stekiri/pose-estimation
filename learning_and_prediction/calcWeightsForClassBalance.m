@@ -1,4 +1,9 @@
 function classWeights = calcWeightsForClassBalance(imgsPerClass, factor)
+%calcWeightsForClassBalance Calculate weights to ensure class balance.
+% classWeights = calcWeightsForClassBalance(imgsPerClass, factor) returns
+% weights which can improve the problem that results when classes are
+% imbalanced. Without weights small classes are less likely to be predicted
+% and large classes are over-represented.
 
 classWeights = [];
 

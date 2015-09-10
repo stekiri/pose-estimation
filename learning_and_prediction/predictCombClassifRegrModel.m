@@ -1,10 +1,14 @@
 function [prediction, probEstimates, plotTitle] = ...
-    testCombClassifRegrModel(modelC, modelR, testData, amountClasses, params)
+    predictCombClassifRegrModel(modelC, modelR, testData, numClasses, params)
+%predictCombClassifRegrModel Predict using classification and regression model.
+% [prediction, probEstimates, plotTitle] = predictCombClassifRegrModel(modelC, modelR, testData, numClasses, params)
+% returns a prediction by using a classification and regression model.
+% Decision which model is used depends on a predefined threshold.
 
 if params.threshold == 0
     % perform classification only
     [prediction, probEstimates] = testClassifModel(...
-        modelC, testData.features, params, amountClasses);
+        modelC, testData.features, params, numClasses);
     plotTitle = 'classification';
     
 elseif params.threshold >= 3.14
@@ -15,7 +19,7 @@ elseif params.threshold >= 3.14
 else
     % perform classification and regression
     [clPredDouble, probEstimates] = testClassifModel(...
-        modelC, testData.features, params, amountClasses);
+        modelC, testData.features, params, numClasses);
     [regPrediction] = testRegrModel(modelR, testData.features, params);
     
     % perform voting
@@ -27,7 +31,7 @@ end
 end
 
 function [prediction, probEstimates] = testClassifModel(...
-    model, testFeatures, params, amountClasses)
+    model, testFeatures, params, numClasses)
 
 switch params.classifLibrary
     case 'matlab'
@@ -53,11 +57,11 @@ switch params.classifLibrary
             case 'onevsone_custom'
                 [predictionDouble, probEstimates] = svmpredictSeperately(...
                     dummyLabels, double(testFeatures), model, ...
-                    amountClasses, params);
+                    numClasses, params);
         end
         
-        amountClassesRep = repmat(amountClasses, size(predictionDouble,1), 1);
-        predictionCell = arrayfun(@getClassLabelAsString, predictionDouble, amountClassesRep, ...
+        numClassesRep = repmat(numClasses, size(predictionDouble,1), 1);
+        predictionCell = arrayfun(@getClassLabelAsString, predictionDouble, numClassesRep, ...
             'UniformOutput', false);
         prediction = char2double(char(predictionCell));
         
@@ -82,9 +86,9 @@ switch params.regrLibrary
 end
 end
 
-function classString = getClassLabelAsString(classDouble, amountClasses)
+function classString = getClassLabelAsString(classDouble, numClasses)
 
-[centers, ~] = calcCenterAndBoundsForClass(amountClasses);
+[centers, ~] = calcCenterAndBoundsForClass(numClasses);
 classString = sprintf('%02d_%+0.2f', classDouble, centers(classDouble));
 
 end

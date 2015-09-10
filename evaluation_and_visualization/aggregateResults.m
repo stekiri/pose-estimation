@@ -1,4 +1,9 @@
 function aggregatedResults = aggregateResults(allResults, folds)
+%aggregateResults Aggregate cross-validated results.
+% aggregatedResults = aggregateResults(allResults, folds) concatenates the
+% results from the single folds produced by the cross-validation process.
+% The aggregated results can be used to evaluate and visualize the
+% performance over all folds.
 
 aggregatedResults = cell(1,5);
 

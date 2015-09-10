@@ -1,3 +1,5 @@
+% Script to create visualizations for the HOG features.
+
 %% load image
 
 imgLocation = '/home/steffen/Dokumente/KITTI/experiments/classified_images/easy_cl16_mir150_rem150/training/01_-2.75/Car_-2.56_-00003064_0_0.03.png';

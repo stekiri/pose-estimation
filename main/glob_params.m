@@ -1,4 +1,4 @@
-%% Load all parameters
+%% Load all necessary parameters
 
 fprintf('Are you cross-validating on the training set or predicting on the test set?\n')
 fprintf('Consider adjustments for SVM parameter?\n')
@@ -56,7 +56,7 @@ processParams.folderAllImages = fullfile(dirs.crop, sprintf('%s_allImages', ...
     processParams.cropFolder));
 load(strcat(processParams.cropFolder, '_allImages.mat'))
 processParams.imgsPerClass  = imgsPerClass;
-processParams.featureName   = 'HOG'; % alternatives: 'HOG', 'HSC'
+processParams.featureName   = 'HSC'; % alternatives: 'HOG', 'HSC'
 
 % - for plotting of the images per class
 distrParams.print        = false;
@@ -105,6 +105,7 @@ switch processParams.featureName
         featureParams.hscParams.patchSize     = [8 8];
         featureParams.hscParams.amountCells   = [4 6];
         featureParams.hscParams.binning       = 'hard'; % alternatives: 'hard' (ToDo: 'soft', 'sliding')
+        featureParams.hscParams.powerTrans    = 1;
         % SPAMS parameters
         featureParams.spamsParams.K           = dictLength;  % learns a dictionary with K elements
         featureParams.spamsParams.mode        = 3;

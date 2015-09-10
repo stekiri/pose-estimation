@@ -1,5 +1,11 @@
 function [booleanVal, newRearImage] = extractionCriteriaFullfilled(obj, params, ...
     lastRearImage, currentFrame)
+%extractionCriteriaFullfilled Check if criteria for extraction are fullfilled.
+% Check if the image which is supposed to be cropped fullfills all the criteria:
+% 1. occlusion value,
+% 2. truncation value,
+% 3. image size, and
+% 4. comply with removal frequency for backside images.
 
 % initialize values
 booleanVal = false;
@@ -32,9 +38,4 @@ if (sum(strcmp(obj.vehicleType, params.objects)) == 1) && ...
         end
     end
 end
-
-% if booleanVal == false
-%     fprintf('notAllowed\n');
-%     obj
-% end
 end

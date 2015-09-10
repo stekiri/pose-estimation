@@ -1,4 +1,7 @@
 function parentDir = getParentDirectory(path, depth)
+%getParentDirectory Get the parent directory.
+% Recursive determination of the parent directory by defining a depth
+% larger than 1.
 
 pathSplit = strsplit(path, '/');
 parentDirSplit = pathSplit(1, 1:end-1);

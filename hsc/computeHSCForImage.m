@@ -1,7 +1,13 @@
 function feature = computeHSCForImage(img, D, hscParams, spamsParams)
+%computeHSCForImage Computes the HSC feature.
+% feature = computeHSCForImage(img, D, hscParams, spamsParams) computes
+% the Histograms of Sparse Codes (HSC) feature for the input image img.
+% D is used dictionary, spamsParams contains all the necessary parameters
+% for the SPAMS library.
 
+% calculate all uniformly preprocessed patches
 slidingImgPatches = computeUniformPatches(img, hscParams);
-
+% compute the sparse codes for all patches
 alpha = mexLasso(slidingImgPatches, D, spamsParams);
 
 % initialize all cells and set values in cells to zero
@@ -39,6 +45,9 @@ for r=1:hscParams.amountCells(1)
 end
 % transpose
 feature = feature';
+
+% power transformation to increase discriminative power
+feature = feature.^hscParams.powerTrans;
 
 % ---- TODO: implement soft binning + sliding window ----
 

@@ -1,5 +1,9 @@
 function [featureVectors, exactLabels, classLabels, locations] = ...
     computeFeaturesForImages(imgSet, featureParams, featureName)
+%computeFeaturesForImages Compute the features for an image set.
+% Computes either the HOG or the HSC features for a given image set. Also,
+% the exact labels, the class labels and the locations of the images are
+% returned.
 
 if strcmp(featureName, 'HOG')
     if sum(featureParams.blockSize > featureParams.amountHOGs) > 0

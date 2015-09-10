@@ -1,4 +1,7 @@
 function bin = getBinAssignment(deviation, numBins)
+%getBinAssignment Compute to which bin a deviation belongs to.
+% For the computation of the error plot, it is necessary to know to which
+% bin a certain deviation belongs to.
 
 deviationLimits = linspace(0,3.14,numBins+1);
 deviationBins = zeros(numBins,2);

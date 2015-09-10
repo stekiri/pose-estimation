@@ -1,5 +1,7 @@
 function [type, angle, number, occlusion, truncation, height, width] = ...
     getImageProperties(imagePath)
+%getImageProperties Get the properties of a cropped image.
+% The properties are encoded in the file name of the cropped image.
 
 [~, fileName, ~] = fileparts(imagePath);
 

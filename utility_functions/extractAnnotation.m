@@ -1,4 +1,5 @@
 function obj = extractAnnotation(Annot,j)
+%extractAnnotation Extracts the annotations for an object.
 
 obj.vehicleType = Annot{1, 1}{j};
 obj.occlusion = Annot{1, 3}(j);

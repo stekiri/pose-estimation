@@ -1,4 +1,8 @@
 function [D, model] = learnDictionary(imgSet, imgParams, spamsParams)
+%learnDictionary Learn a dictionary of patches.
+% [D, model] = learnDictionary(imgSet, imgParams, spamsParams) returns a
+% dictionary D which contains all the most frequently used patches in an
+% image set. The SPAMS library is used for this purpose.
 
 tic
 fprintf('Learn dictionary ... ');

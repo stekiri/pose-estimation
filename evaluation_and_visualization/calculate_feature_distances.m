@@ -1,3 +1,6 @@
+% Script to compute the distances in feature space between the all images.
+% Different variants with varying computation time.
+
 % features = allFoldsData{1,1}.features;
 % 
 % featDistances = zeros(size(features,1));
@@ -78,7 +81,7 @@ end
 t = toc;
 fprintf('time: %f', t);
 
-%%
+%% example plot
 amountNeighbors = 9;
 for idxExampleImg = 1:20
     

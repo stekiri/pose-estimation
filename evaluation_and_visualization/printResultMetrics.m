@@ -1,4 +1,7 @@
 function printResultMetrics(dataCell, params)
+%printResultMetrics Print the results metrics.
+% printResultMetrics(dataCell, params) prints the metrics containing the
+% results on the command line.
 
 dashedLine = '---------------------------\n';
 fprintf(dashedLine);

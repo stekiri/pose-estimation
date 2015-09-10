@@ -1,5 +1,6 @@
 function imgSet = removeImgsFromSet(imgSet, limit)
-% takes only i-th image from imgSet (i is defined by the variable 'ratio')
+%removeImgsFromSet Remove images from an image set.
+% Takes every i-th image from imgSet (i is defined by the variable 'ratio').
 
 reverseStr = '';
 amountClasses = size(imgSet,2);

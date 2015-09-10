@@ -1,4 +1,11 @@
 function showNearestNeighbors(imgLocExample, aggregatedResults, featDistances, processParams, params)
+%showNearestNeighbors Show the nearest neighbors of an image.
+% showNearestNeighbors(imgLocExample, aggregatedResults, featDistances, processParams, params)
+% creates a plot which contains the original image and images which are
+% close to it in feature space. imgLocExample contains the original image,
+% aggregatedResults contains all the results from the single folds,
+% featDistances contains the pair-wise distances of images in feature
+% space.
 
 titleFontSize = 7;
 % merge to have all the data from the folds in one data object

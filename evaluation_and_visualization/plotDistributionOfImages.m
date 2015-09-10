@@ -1,13 +1,18 @@
-function [f, imagesPerClass] = plotDistributionOfImages(imgSet, amountClasses, params)
+function [f, imagesPerClass] = plotDistributionOfImages(imgSet, numClasses, params)
+%plotDistributionOfImages Plots the amount of images per class.
+% [f, imagesPerClass] = plotDistributionOfImages(imgSet, numClasses, params)
+% creates a plot which contains the number of images per class. numClasses
+% specifies the amount of distinct classes. imgSet is an ImageSet object
+% and contains all images.
 
 if size(imgSet, 2) == 1
     
-    imagesPerClass = getAmountOfImagesPerClass(imgSet, amountClasses);
+    imagesPerClass = getAmountOfImagesPerClass(imgSet, numClasses);
 
 % if imgSet consists of nested image sets already pre-sorted into classes
 else
     setClasses = size(imgSet, 2);
-    if setClasses ~= amountClasses
+    if setClasses ~= numClasses
         fprintf('WARNING: Amount of specified classes inconsistent with imageset!\n')
     end
     imagesPerClass = zeros(1, setClasses);
@@ -30,7 +35,7 @@ end
 f = figure;
 bar(imagesPerClass);
 % lower limit set to 0.01 so that '0' on x-axis is not visible
-xlim([0.01 amountClasses+1])
+xlim([0.01 numClasses+1])
 title({'images per class', sprintf('- %s -', inputname(1))})
 ylim([0 yLimit])
 

@@ -1,4 +1,8 @@
 function [allTruClass, allPredClass] = createClassMembershipPlot(allResults, processParams, params)
+%createClassMembershipPlot Create a plot with the amount of class memberships.
+% [allTruClass, allPredClass] = createClassMembershipPlot(allResults, processParams, params)
+% creates a plot which shows how many predictions and how many actual
+% values there are per class.
 
 allPredClass = 0;
 allTruClass  = 0;

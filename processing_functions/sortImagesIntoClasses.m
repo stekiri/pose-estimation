@@ -1,11 +1,14 @@
-function sortImagesIntoClasses(imgDir, outputDir, amountClasses)
+function sortImagesIntoClasses(imgDir, outputDir, numClasses)
+%sortImagesIntoClasses Sort images into classes.
+% Sorts all cropped images from an directory into classes to make
+% facilitate training for classification.
 
 % create output directory
 mkdir(outputDir);
 
 folderNames = getSubfolders(imgDir);
 
-[centers, classBounds] = calcCenterAndBoundsForClass(amountClasses);
+[centers, classBounds] = calcCenterAndBoundsForClass(numClasses);
 
 for m = 1:length(folderNames)
     fprintf('Sorting %s images into classes ... ', folderNames{m});
@@ -22,10 +25,10 @@ for m = 1:length(folderNames)
     A = [helpVec cell2mat(imgCell(:,2:end))];
     
     % sort the images into appropriate class
-    imgsPerClass = cell(amountClasses, 1);
-    for n = 1:amountClasses
+    imgsPerClass = cell(numClasses, 1);
+    for n = 1:numClasses
         % get all images belonging to the current class
-        if n == amountClasses
+        if n == numClasses
             % handle special case (for +-3.14)
             imgsPerClass{n, 1} = ...
                 A((A(:,2) >= classBounds(n, 1) | A(:,2) < classBounds(n, 2)),:);
@@ -37,7 +40,7 @@ for m = 1:length(folderNames)
     
     % copy image into class folder
     reverseStr = '';
-    for j = 1:amountClasses
+    for j = 1:numClasses
         
         classFolderName = sprintf('%02d_%+0.2f', j, centers(j));
         splitFolder = fullfile(outputDir, currentImgSet);
@@ -56,7 +59,7 @@ for m = 1:length(folderNames)
             copyfile(origFile, destFile)
         end
         % display progress
-        msg = sprintf('%d/%d', j, amountClasses);
+        msg = sprintf('%d/%d', j, numClasses);
         fprintf([reverseStr, msg]);
         reverseStr = repmat(sprintf('\b'), 1, length(msg));
     end

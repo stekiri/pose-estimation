@@ -1,5 +1,9 @@
 function [finalPredictions, probEstimates] = svmpredictSeperately(...
     labels, features, model, amountClasses, params)
+%svmpredictSeperately Predict with seperately trained SVM classifiers.
+% [finalPredictions, probEstimates] = svmpredictSeperately(labels, features, model, amountClasses, params)
+% predicts by using the seperately trained SVM classifiers when all
+% possible combinations of classifiers shall be used, e.g., 1vs2 AND 2vs1.
 
 finalPredictions = zeros(size(features,1),1);
 probEstimates = [];

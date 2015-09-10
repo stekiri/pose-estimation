@@ -1,4 +1,7 @@
 function cell = getAssignmentToCell(index, imgParams)
+%getAssignmentToCell Determine cell of a patch.
+% cell = getAssignmentToCell(index, imgParams) computes  the cell to which
+% a certain patch identified by its index belongs to.
 
 % initialization (for easier reading)
 height = imgParams.imgSize(1,1);

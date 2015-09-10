@@ -1,8 +1,12 @@
-function [modelC, modelR] = trainCombClassifRegrModel(trainData, amountClasses, params)
+function [modelC, modelR] = trainCombClassifRegrModel(trainData, numClasses, params)
+%trainCombClassifRegrModel Train a classification and regression model.
+% [modelC, modelR] = trainCombClassifRegrModel(trainData, numClasses, params)
+% trains a classification and a regression model. Later these two models
+% are used in a combined manner to determine the final output.
 
 if params.threshold == 0
     % perform classification only
-    modelC = trainClassifModel(trainData, params, amountClasses);
+    modelC = trainClassifModel(trainData, params, numClasses);
     modelR = [];
     
 elseif params.threshold >= 3.14
@@ -12,18 +16,18 @@ elseif params.threshold >= 3.14
     
 else
     % perform classification and regression
-    modelC = trainClassifModel(trainData, params, amountClasses);
+    modelC = trainClassifModel(trainData, params, numClasses);
     modelR = trainRegrModel(trainData, params);
     
 end
 end
 
-function model = trainClassifModel(trainData, params, amountClasses)
+function model = trainClassifModel(trainData, params, numClasses)
 
 switch params.classifLibrary
     case 'matlab'
         
-        [~, ~, S.ClassNames] = calcCenterAndBoundsForClass(amountClasses);
+        [~, ~, S.ClassNames] = calcCenterAndBoundsForClass(numClasses);
         S.ClassNames = char(S.ClassNames);
         S.ClassificationCosts = buildEquallyDistributedCostMatrix(16, 'exponential');
         
@@ -49,7 +53,7 @@ switch params.classifLibrary
                 
             case 'onevsone_custom'
                 model = svmtrainSeperately(trainData.classLblsDouble, ...
-                    double(trainData.features), params, amountClasses);
+                    double(trainData.features), params, numClasses);
                 
         end
 end

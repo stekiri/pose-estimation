@@ -1,5 +1,9 @@
 function equalizedImgSets = equalizeImageSet(imgSets, params)
 amountClasses = size(imgSets, 2);
+%equalizeImageSet Creates image sets of equal sizes.
+% Mirroring of images to increase the number of images in small classes.
+% Removal of images in large classes to make numer of images in all
+% classes more equal.
 
 fprintf('Equalize image set "%s" ... \n', inputname(1));
 fprintf('* Mirror images for necessary classes ... ');

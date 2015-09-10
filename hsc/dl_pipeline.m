@@ -1,3 +1,5 @@
+% Script to learn dictionary with the SPAMS library.
+
 %% Learn dictionary
 
 % load image set

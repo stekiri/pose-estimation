@@ -1,4 +1,7 @@
-% extracted from result objects
+% script to create the figure with dictionary lenght vs computation time
+% vs accuracy for the HSC features
+
+% extracted from result objects in result folder
 dictLengths     = [25       64      100     256];
 cosMetrics      = [0.955    0.964   0.964   0.965];
 tanhMetrics     = [0.841    0.850   0.851   0.853];

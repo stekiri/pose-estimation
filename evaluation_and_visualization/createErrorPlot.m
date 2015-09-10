@@ -1,7 +1,13 @@
 function binSums = createErrorPlot(dataCell, params)
+%createErrorPlot Plot the prediction errors.
+% binSums = createErrorPlot(dataCell, params) creates a plot which contains
+% the errors of the prediction. The error is the deviation between ground
+% truth and prediction in radian. binSums contains how many images are in
+% a certain bin on a per class basis. A bin contains a certain range of
+% deviation errors, e.g. bin 1 contains all deviations from [0,0.5].
 
 % A:
-% 1st row: regression estimate
+% 1st row: prediction
 % 2nd row: ground truth
 % 3rd row: radian difference
 A = cell2mat(dataCell(:,1:3));
@@ -100,8 +106,8 @@ set(gca, 'xticklabel', getBarLabels(params.diagramBins, params.xtickFlag))
 ax = gca;
 ax.Title.String = {...
                     params.description; ...
-                    sprintf('(cosine metric: %0.3f)', evalMetric); ...
-                    sprintf('(tanh metric: %0.3f)', tanhMetric)};
+                    sprintf('(cosine metric: %0.4f)', evalMetric); ...
+                    sprintf('(tanh metric: %0.4f)', tanhMetric)};
 
 ax.XLabel.String = 'Deviation';
 % don't show all ticks

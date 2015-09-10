@@ -1,4 +1,7 @@
 function [diffStr, diffNumber] = getImageDifficulty(occlusion, truncation, height)
+%getImageDifficulty Get the difficulty of an image.
+% Depending of occlusion, truncation and image size as stated in KITTI
+% Vision readme file.
 
 if     occlusion == 0 && truncation <= 0.15 && height >= 40
     diffStr     = 'easy';

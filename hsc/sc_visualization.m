@@ -1,3 +1,5 @@
+% Script to create a sparse code visualizations.
+
 imgLocation = dlTrainSubSet(1,3).ImageLocation{1,8};
 figure;
 imshow(imgLocation)

@@ -1,11 +1,13 @@
 function cropObjectsFromImages(imgDir, txtDir, outDir, params)
+%cropObjectsFromImages Crop objects from images.
+% Crops objects, such as cars or trucks, from a large annotated image and
+% saves the cropped images on the HDD.
 
 % create directory
 mkdir(outDir);
-
 % get the names of the folds
 folderNames = getSubfolders(imgDir);
-
+% unique number for every cropped image to not end up with same file names
 vehNumber = 0;
 
 % perform cropping for training and test set

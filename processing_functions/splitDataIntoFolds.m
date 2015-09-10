@@ -1,4 +1,7 @@
 function splitDataIntoFolds(amountFolds, workFolder, outPath)
+%splitDataIntoFolds Split the data into folds.
+% The data from all the drives is split into folds to enable leave-one-out
+% cross-validation.
 
 %% load random numbers
 fileID = fopen(fullfile(workFolder, 'devkit/mapping/train_rand.txt'));

@@ -1,6 +1,11 @@
-function splitDataIntoDrives(workFolder, imgFolder, outPath, recursive)
+function splitDataIntoDrives(workFolder, imgFolder, outPath)
+%splitDataIntoDrives Split images into their drives.
+% Splitting into drives ensures that there are no almost duplicates in the
+% single folds. An almost duplicate is an image that is captured of the
+% same car but just a frame after. These two images are quite similar but
+% not exact duplicates.
 
-%% load random numbers
+% load random numbers
 fileID = fopen(fullfile(workFolder, 'devkit/mapping/train_rand.txt'));
 C = textscan(fileID,'%s');
 fclose(fileID);
@@ -13,7 +18,7 @@ for i=1:amountImages
     randomNumbers(i,1) = str2double(randomNumbersCell{1,i});
 end
 
-%% load the drives
+% load the drives
 fileID = fopen(fullfile(workFolder, 'devkit/mapping/train_mapping.txt'));
 C = textscan(fileID,'%s %s %s');
 fclose(fileID);
@@ -28,8 +33,7 @@ for i=1:amountImages
     dates{i,1} = C{1,1}{i,1};
 end
 
-%% assign each image to its drive
-
+% assign each image to its drive
 imgSet = imageSet(imgFolder, 'recursive');
 
 for s=1:length(imgSet)

@@ -1,5 +1,6 @@
 function doubleArray = char2double(charArray)
-% conversion of labels from char to double
+%char2double Converts the char labels to double.
+% Conversion of labels from char to double format.
 
 amountLabels = size(charArray, 1);
 % initialize

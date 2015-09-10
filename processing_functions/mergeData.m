@@ -1,4 +1,8 @@
 function [trainingData, testData] = mergeData(allFoldsData, k)
+%mergeData Merge data from multiple folds.
+% [trainingData, testData] = mergeData(allFoldsData, k) merges the data
+% from all folds except the k-th fold.
+% [data] = mergeData(allFoldsData) merges the data from all folds.
 
 % concatenate data from the folds with two alternatives
 

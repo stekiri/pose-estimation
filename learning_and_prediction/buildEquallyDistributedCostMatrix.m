@@ -1,17 +1,22 @@
-function costMatrix = buildEquallyDistributedCostMatrix(amountClasses, mode)
+function costMatrix = buildEquallyDistributedCostMatrix(numClasses, mode)
+%buildEquallyDistributedCostMatrix Construct a cost matrix.
+% costMatrix = buildEquallyDistributedCostMatrix(amountClasses, mode)
+% constructs a cost matrix with small cost for adjacent classes and large
+% costs for opposite classes. mode can be either 'linear' or 'exponential',
+% numClasses contains the number of classes.
 
-costMatrix = zeros(amountClasses);
+costMatrix = zeros(numClasses);
 
-maxDistance = floor(amountClasses/2);
+maxDistance = floor(numClasses/2);
 
-for i=1:amountClasses
-    for j=1:amountClasses
+for i=1:numClasses
+    for j=1:numClasses
         helpVal = abs(i-j);
         
         if helpVal <= maxDistance
             linearCost = helpVal;
         else
-            if mod(amountClasses,2) == 1
+            if mod(numClasses,2) == 1
                 offset = 1;
             else
                 offset = 0;
@@ -22,7 +27,7 @@ for i=1:amountClasses
         switch mode
             case 'exponential'
                 costMatrix(i,j) = 2.^linearCost;
-                for k=1:amountClasses
+                for k=1:numClasses
                     costMatrix(k,k) = 0;
                 end
             case 'linear'
